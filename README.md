@@ -19,7 +19,7 @@ The code is written in the simplest way so it can be understood easily and clear
 ## Strategies
 
 #### Momentum Strategies:
-1- Value and Momentum Everywhere
+1- [Value and Momentum Everywhere](https://github.com/vd1371/AcademicQuantLab/blob/main/Momentum/ValueAndMomentumEveryWhere.ipynb)
 
 ## Collaboration
 Feel free to fork the repo and make PRs to expand the repo. If you want me to do it, please [send me an email](mailto:vd1371@gmail.com) with a link to the academic paper that you want me replicate.
