@@ -17,15 +17,35 @@ The code is written in the simplest way so it can be understood easily and clear
 
 
 ## Strategies
+** Numbers are based on the orders that they have been added to the repo **
 
 #### Momentum Strategies:
 1- [Value and Momentum Everywhere](https://github.com/vd1371/AcademicQuantLab/blob/main/Momentum/ValueAndMomentumEveryWhere.ipynb)
+3- [Predicting DJIA, NASDAQ And NYSE Index Prices Using ARIMA And VAR Models](https://github.com/vd1371/AcademicQuantLab/blob/main/Momentum/PredictingIndicesUsingArimaAndVARModels.ipynb)
+
+#### Reversion Strategies:
+2- [Stock Returns After Extreme Loss Events](https://github.com/vd1371/AcademicQuantLab/blob/main/Reversion/StockReturnsAfterExtremeLossEvents.ipynb)
 
 ## Collaboration
 Feel free to fork the repo and make PRs to expand the repo. If you want me to do it, please [send me an email](mailto:vd1371@gmail.com) with a link to the academic paper that you want me replicate.
 
+## Contact
+If you have any questions or want to collaborate, feel free to send me an email at [Here](mailto:vd1371@gmail.com)
+
 
 ## Disclaimer:
+The information provided in this repository is for educational purposes only. It is not intended to be used for real-world financial decision-making or trading. The authors and contributors of this repository are not liable for any losses or damages resulting from the use of this information. Use the information provided here at your own risk.
+
+## License
+[MIT](https://choosealicense.com/licenses/mit/)
+
+The MIT License (MIT)
+Copyright (c) 2021 Volkan Durgar
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+## Disclaimer
 
 This GitHub repository is intended for research and educational purposes only. The content provided here, including any code, strategies, or analysis, is not intended to be used for real-world financial decision-making or trading.
 
