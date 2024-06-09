@@ -21,6 +21,7 @@ The code is written in the simplest way so it can be understood easily and clear
 
 #### Momentum Strategies:
 1- [Value and Momentum Everywhere](https://github.com/vd1371/AcademicQuantLab/blob/main/Momentum/ValueAndMomentumEveryWhere.ipynb)
+
 3- [Predicting DJIA, NASDAQ And NYSE Index Prices Using ARIMA And VAR Models](https://github.com/vd1371/AcademicQuantLab/blob/main/Momentum/PredictingIndicesUsingArimaAndVARModels.ipynb)
 
 #### Reversion Strategies:
