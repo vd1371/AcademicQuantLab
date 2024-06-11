@@ -24,6 +24,8 @@ The code is written in the simplest way so it can be understood easily and clear
 
 3- [Predicting DJIA, NASDAQ And NYSE Index Prices Using ARIMA And VAR Models](https://github.com/vd1371/AcademicQuantLab/blob/main/Momentum/PredictingIndicesUsingArimaAndVARModels.ipynb)
 
+4- [Revisiting Momentum](https://github.com/vd1371/AcademicQuantLab/blob/main/Momentum/Revisiting_Momentum.ipynb)
+
 #### Reversion Strategies:
 2- [Stock Returns After Extreme Loss Events](https://github.com/vd1371/AcademicQuantLab/blob/main/Reversion/StockReturnsAfterExtremeLossEvents.ipynb)
 
