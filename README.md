@@ -29,6 +29,9 @@ The code is written in the simplest way so it can be understood easily and clear
 #### Reversion Strategies:
 2- [Stock Returns After Extreme Loss Events](https://github.com/vd1371/AcademicQuantLab/blob/main/Reversion/StockReturnsAfterExtremeLossEvents.ipynb)
 
+#### Arbitrage Strategies:
+5- [Statistical arbitrage strategy based on VIX-to-market based signal](https://github.com/vd1371/AcademicQuantLab/blob/main/Arbitrage/correlation_of_sp500_return_and_vix_return.ipynb)
+
 ## Collaboration
 Feel free to fork the repo and make PRs to expand the repo. If you want me to do it, please [send me an email](mailto:vd1371@gmail.com) with a link to the academic paper that you want me replicate.
 
