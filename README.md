@@ -29,6 +29,9 @@ The code is written in the simplest way so it can be understood easily and clear
 #### Reversion Strategies:
 2- [Stock Returns After Extreme Loss Events](https://github.com/vd1371/AcademicQuantLab/blob/main/Reversion/StockReturnsAfterExtremeLossEvents.ipynb)
 
+#### Arbitrage Strategies:
+5- [Statistical arbitrage strategy based on VIX-to-market based signal](https://github.com/vd1371/AcademicQuantLab/blob/main/Arbitrage/correlation_of_sp500_return_and_vix_return.ipynb)
+
 ## Collaboration
 Feel free to fork the repo and make PRs to expand the repo. If you want me to do it, please [send me an email](mailto:vd1371@gmail.com) with a link to the academic paper that you want me replicate.
 
@@ -43,7 +46,7 @@ The information provided in this repository is for educational purposes only. It
 [MIT](https://choosealicense.com/licenses/mit/)
 
 The MIT License (MIT)
-Copyright (c) 2021 Volkan Durgar
+Copyright (c) 2024 Vahid Asghari
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
