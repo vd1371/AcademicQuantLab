@@ -26,6 +26,8 @@ The code is written in the simplest way so it can be understood easily and clear
 
 4- [Revisiting Momentum](https://github.com/vd1371/AcademicQuantLab/blob/main/Momentum/Revisiting_Momentum.ipynb)
 
+6- [Combining low volatility with momentum](https://github.com/vd1371/AcademicQuantLab/blob/main/Momentum/CombiningLowVolatilityWithMomentumAnomalies.ipynb)
+
 #### Reversion Strategies:
 2- [Stock Returns After Extreme Loss Events](https://github.com/vd1371/AcademicQuantLab/blob/main/Reversion/StockReturnsAfterExtremeLossEvents.ipynb)
 
