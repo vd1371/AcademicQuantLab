@@ -169,9 +169,11 @@ cython_debug/
 *.jpeg
 *.gif
 *.svg
-
+*.npy
 *.pdf
 *.html
 
 !Symbols.csv
 .idea/
+
+utils/reviewer.ipynb
