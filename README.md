@@ -30,6 +30,8 @@ The code is written in the simplest way so it can be understood easily and clear
 
 9- [Asset pricing: A tale of night and day](https://github.com/vd1371/AcademicQuantLab/blob/main/Momentum/Investing_with_Night_returns.ipynb)
 
+10- [Bet against beta in HK Market](ttps://github.com/vd1371/AcademicQuantLab/blob/main/Momentum/bet_against_beta_HK.ipynb)
+
 #### Reversion Strategies:
 2- [Stock Returns After Extreme Loss Events](https://github.com/vd1371/AcademicQuantLab/blob/main/Reversion/StockReturnsAfterExtremeLossEvents.ipynb)
 
