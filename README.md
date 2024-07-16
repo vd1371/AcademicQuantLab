@@ -28,6 +28,10 @@ The code is written in the simplest way so it can be understood easily and clear
 
 6- [Combining low volatility with momentum](https://github.com/vd1371/AcademicQuantLab/blob/main/Momentum/CombiningLowVolatilityWithMomentumAnomalies.ipynb)
 
+9- [Asset pricing: A tale of night and day](https://github.com/vd1371/AcademicQuantLab/blob/main/Momentum/Investing_with_Night_returns.ipynb)
+
+10- [Bet against beta in HK Market](ttps://github.com/vd1371/AcademicQuantLab/blob/main/Momentum/bet_against_beta_HK.ipynb)
+
 #### Reversion Strategies:
 2- [Stock Returns After Extreme Loss Events](https://github.com/vd1371/AcademicQuantLab/blob/main/Reversion/StockReturnsAfterExtremeLossEvents.ipynb)
 
@@ -35,6 +39,8 @@ The code is written in the simplest way so it can be understood easily and clear
 5- [Statistical arbitrage strategy based on VIX-to-market based signal](https://github.com/vd1371/AcademicQuantLab/blob/main/Arbitrage/correlation_of_sp500_return_and_vix_return.ipynb)
 
 7- [Stat Arb in Crude Oil Markets](https://github.com/vd1371/AcademicQuantLab/blob/main/Arbitrage/stat_arb_in_crude_oil_market.ipynb)
+
+8- [Pair Trading](https://github.com/vd1371/AcademicQuantLab/blob/main/Arbitrage/Pair_tradin.ipynb)
 
 
 ## Collaboration
