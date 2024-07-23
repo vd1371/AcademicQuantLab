@@ -34,6 +34,8 @@ The code is written in the simplest way so it can be understood easily and clear
 
 11- [Technical Trading Strategies in Crypto](https://github.com/vd1371/AcademicQuantLab/blob/main/Momentum/Technical_trading_straetegies_in_crypto.ipynb)
 
+12- [Cross Stock Momentum](https://github.com/vd1371/AcademicQuantLab/blob/main/Momentum/Cross_stock_Momentum.ipynb)
+
 #### Reversion Strategies:
 2- [Stock Returns After Extreme Loss Events](https://github.com/vd1371/AcademicQuantLab/blob/main/Reversion/StockReturnsAfterExtremeLossEvents.ipynb)
 
