@@ -250,7 +250,8 @@ if __name__ == "__main__":
         'VPL'   # Pacific
     ]
     
-    # Store best strategies for each ETF
+    # Store results for all ETFs
+    all_results = {}
     best_strategies = {}
     all_sharpe_ratios = {}
     
@@ -265,21 +266,42 @@ if __name__ == "__main__":
                     results, best_strategy, sharpe_ratios = result
                     best_strategies[etf] = best_strategy
                     all_sharpe_ratios[etf] = sharpe_ratios
+                    all_results[etf] = results  # Store all results
             except Exception as e:
                 print(f"Error processing {etf}: {str(e)}")
     
-    # Create summary of best strategies
+    # Create summary of best strategies and key stats
     summary_dir = os.path.join('data', 'summary')
     os.makedirs(summary_dir, exist_ok=True)
     
+    # Save best strategies summary
     with open(os.path.join(summary_dir, 'best_strategies.txt'), 'w') as f:
         f.write("Best Strategy by ETF\n")
         f.write("=" * 50 + "\n\n")
         for etf, strategy in best_strategies.items():
             f.write(f"{etf}: {strategy} (Sharpe: {all_sharpe_ratios[etf][strategy]:.2f})\n")
+            f.write(f"Key Statistics:\n")
+            f.write("-" * 30 + "\n")
+            for metric, value in all_results[etf][strategy].items():
+                f.write(f"{metric}: {value}\n")
+            f.write("\n")
     
     # Create DataFrame of all Sharpe ratios
     sharpe_df = pd.DataFrame(all_sharpe_ratios).T
     sharpe_df.to_csv(os.path.join(summary_dir, 'sharpe_ratios.csv'))
     
-    print("\nAnalysis complete. Results saved in data folder.")
+    # Create summary statistics DataFrame
+    summary_stats = []
+    for etf in etfs:
+        if etf in all_results:
+            best_strat = best_strategies[etf]
+            stats = all_results[etf][best_strat]
+            stats['ETF'] = etf
+            stats['Strategy'] = best_strat
+            summary_stats.append(stats)
+    
+    stats_df = pd.DataFrame(summary_stats)
+    stats_df.set_index('ETF', inplace=True)
+    stats_df.to_csv(os.path.join(summary_dir, 'strategy_statistics.csv'))
+    
+    print("\nAnalysis complete. Results saved in data/summary folder.")
