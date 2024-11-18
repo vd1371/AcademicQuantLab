@@ -10,6 +10,8 @@ from Signals import (
     get_vpvma_signals_zero_cross
 )
 import os
+from concurrent.futures import ThreadPoolExecutor, as_completed
+import yfinance as yf
 
 def calculate_performance_metrics(df):
     """Calculate various trading performance metrics"""
@@ -121,7 +123,7 @@ def plot_performance(df):
     plt.tight_layout()
     plt.show()
 
-def get_trade_info(df, strategy_name):
+def get_trade_info(df, strategy_name, ticker):
     """Extract trade information from the signals DataFrame"""
     trades = []
     position = 0
@@ -168,8 +170,12 @@ def get_trade_info(df, strategy_name):
     
     trades_df = pd.DataFrame(trades)
     
-    # Save trade information to CSV with strategy name
-    output_file = f'data/trade_info_{strategy_name}.csv'
+    # Create ticker-specific directory
+    ticker_dir = os.path.join('data', ticker)
+    os.makedirs(ticker_dir, exist_ok=True)
+    
+    # Save trade information to CSV in ticker directory
+    output_file = os.path.join(ticker_dir, f'trade_info_{strategy_name}.csv')
     trades_df.to_csv(output_file, index=False)
     print(f"\nTrade information for {strategy_name} saved to {output_file}")
     print(f"Total trades: {len(trades_df)}")
@@ -178,79 +184,102 @@ def get_trade_info(df, strategy_name):
     
     return trades_df
 
+def process_etf(etf):
+    """Process a single ETF and return its results"""
+    try:
+        # Create ETF-specific directory
+        ticker_dir = os.path.join('data', etf)
+        os.makedirs(ticker_dir, exist_ok=True)
+        
+        # Download and process data using functions from Signals.py
+        df = yf.Ticker(etf)
+        df_hist = df.history(start='2005-01-01', end='2023-12-31')
+        vix = yf.Ticker('^VIX')
+        vix_df = vix.history(start='2005-01-01', end='2023-12-31')
+        
+        # Dictionary to store results for different strategies
+        results = {}
+        sharpe_ratios = {}
+        
+        # Test different MACD strategies
+        strategies = {
+            'MACD_Standard': lambda: get_macd_signals(df=df_hist.copy(), symbol=etf),
+            'MACD_Zero_Cross': lambda: get_macd_signals_zero_cross(df=df_hist.copy(), symbol=etf),
+            'VPVMA_Standard': lambda: get_vpvma_signals(df=df_hist.copy(), vix_df=vix_df.copy(), symbol=etf),
+            'VPVMA_Zero_Cross': lambda: get_vpvma_signals_zero_cross(df=df_hist.copy(), vix_df=vix_df.copy(), symbol=etf)
+        }
+        
+        for name, strategy_func in strategies.items():
+            # Apply strategy
+            signals_df = strategy_func()
+            
+            # Calculate metrics
+            metrics = calculate_performance_metrics(signals_df)
+            results[name] = metrics
+            sharpe_ratios[name] = float(metrics['Sharpe Ratio'].replace(',', ''))
+            
+            # Save trade information
+            get_trade_info(signals_df, name, etf)
+        
+        # Determine best strategy based on Sharpe ratio
+        best_strategy = max(sharpe_ratios.items(), key=lambda x: x[1])[0]
+        
+        print(f"\nProcessed {etf}")
+        return results, best_strategy, sharpe_ratios
+        
+    except Exception as e:
+        print(f"Error processing {etf}: {str(e)}")
+        return None
+
 if __name__ == "__main__":
-    # Original MACD strategy
-    signals_df = get_macd_signals()
+    # List of ETFs to analyze
+    etfs = [
+        'EEM',  # Emerging Markets
+        'VWO',  # Emerging Markets
+        'FXI',  # China Large-Cap
+        'AAXJ', # Asia ex-Japan
+        'EWJ',  # Japan
+        'ACWX', # All Country World ex-US
+        'CHIX', # China Technology
+        'CQQQ', # China Technology
+        'EWZ',  # Brazil
+        'ERUS', # Russia
+        'EWC',  # Canada
+        'EWU',  # United Kingdom
+        'VGK',  # Europe
+        'VPL'   # Pacific
+    ]
     
-    # Calculate market metrics
-    market_df = signals_df.copy()
-    market_df['Position'] = 1  # Market is always long
-    market_df['Position_Change'] = 0  # Market maintains position
-    market_df['Strategy_Returns'] = market_df['Returns']  # Use market returns directly
-    market_df['Portfolio_Value'] = 1_000_000  # Set initial portfolio value
-    market_df['Portfolio_Returns'] = market_df['Returns']  # Use market returns for portfolio
-    market_df['Portfolio_Value'] = market_df['Portfolio_Value'].iloc[0] * (1 + market_df['Portfolio_Returns']).cumprod()
-    market_metrics = calculate_performance_metrics(market_df)
+    # Store best strategies for each ETF
+    best_strategies = {}
+    all_sharpe_ratios = {}
     
-    # Calculate strategy metrics
-    trades_df = get_trade_info(signals_df, 'macd_original')
-    metrics = calculate_performance_metrics(signals_df)
+    # Process ETFs in parallel
+    with ThreadPoolExecutor(max_workers=4) as executor:
+        futures = {executor.submit(process_etf, etf): etf for etf in etfs}
+        for future in as_completed(futures):
+            etf = futures[future]
+            try:
+                result = future.result()
+                if result:
+                    results, best_strategy, sharpe_ratios = result
+                    best_strategies[etf] = best_strategy
+                    all_sharpe_ratios[etf] = sharpe_ratios
+            except Exception as e:
+                print(f"Error processing {etf}: {str(e)}")
     
-    # Zero-cross MACD strategy
-    signals_df_zero = get_macd_signals_zero_cross()
-    trades_df_zero = get_trade_info(signals_df_zero, 'macd_zero_cross')
-    metrics_zero = calculate_performance_metrics(signals_df_zero)
+    # Create summary of best strategies
+    summary_dir = os.path.join('data', 'summary')
+    os.makedirs(summary_dir, exist_ok=True)
     
-    # VPVMA strategy
-    signals_df_vpvma = get_vpvma_signals()
-    trades_df_vpvma = get_trade_info(signals_df_vpvma, 'vpvma')
-    metrics_vpvma = calculate_performance_metrics(signals_df_vpvma)
+    with open(os.path.join(summary_dir, 'best_strategies.txt'), 'w') as f:
+        f.write("Best Strategy by ETF\n")
+        f.write("=" * 50 + "\n\n")
+        for etf, strategy in best_strategies.items():
+            f.write(f"{etf}: {strategy} (Sharpe: {all_sharpe_ratios[etf][strategy]:.2f})\n")
     
-    # VPVMA zero-cross strategy
-    signals_df_vpvma_zero = get_vpvma_signals_zero_cross()
-    trades_df_vpvma_zero = get_trade_info(signals_df_vpvma_zero, 'vpvma_zero_cross')
-    metrics_vpvma_zero = calculate_performance_metrics(signals_df_vpvma_zero)
+    # Create DataFrame of all Sharpe ratios
+    sharpe_df = pd.DataFrame(all_sharpe_ratios).T
+    sharpe_df.to_csv(os.path.join(summary_dir, 'sharpe_ratios.csv'))
     
-    # Collect all metrics in a dictionary
-    all_metrics = {
-        'Market (Buy & Hold)': market_metrics,
-        'Original MACD': metrics,
-        'Zero-Cross MACD': metrics_zero,
-        'VPVMA': metrics_vpvma,
-        'VPVMA Zero-Cross': metrics_vpvma_zero
-    }
-    
-    # Convert to DataFrame and display
-    metrics_df = pd.DataFrame(all_metrics).T
-    print("\nStrategy Performance Comparison:")
-    print(metrics_df.to_string())
-    
-    # Save metrics to CSV
-    os.makedirs('data', exist_ok=True)
-    metrics_df.to_csv('data/strategy_metrics_comparison.csv')
-    
-    # Plot results for all strategies
-    plt.figure(figsize=(15, 10))
-    plt.title("Strategy Comparison")
-    
-    # Calculate and plot market returns (buy and hold)
-    market_returns = (1 + signals_df['Returns']).cumprod()
-    plt.plot(signals_df.index, market_returns, label='Market (Buy & Hold)', color='gray', linestyle='--', alpha=0.7)
-    
-    # Plot strategy returns
-    plt.plot(signals_df.index, (1 + signals_df['Strategy_Returns']).cumprod(), label='Original MACD')
-    plt.plot(signals_df_zero.index, (1 + signals_df_zero['Strategy_Returns']).cumprod(), label='Zero-Cross MACD')
-    plt.plot(signals_df_vpvma.index, (1 + signals_df_vpvma['Strategy_Returns']).cumprod(), label='VPVMA')
-    plt.plot(signals_df_vpvma_zero.index, (1 + signals_df_vpvma_zero['Strategy_Returns']).cumprod(), label='VPVMA Zero-Cross')
-    
-    plt.grid(True, alpha=0.3)
-    plt.xlabel('Date')
-    plt.ylabel('Cumulative Returns')
-    plt.legend()
-    plt.yscale('log')  # Using log scale for better visualization of returns
-    plt.tight_layout()
-    
-    # Save plot to data folder
-    os.makedirs('data', exist_ok=True)
-    plt.savefig('data/strategy_comparison.png', dpi=300, bbox_inches='tight')
-    plt.close()
+    print("\nAnalysis complete. Results saved in data folder.")

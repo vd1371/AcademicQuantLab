@@ -2,6 +2,82 @@ import pandas as pd
 import yfinance as yf
 import numpy as np
 import os
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
+def download_data(symbol, start_date, end_date):
+    """Download price and VIX data for a symbol"""
+    ticker = yf.Ticker(symbol)
+    df = ticker.history(start=start_date, end=end_date)
+    
+    # Download VIX data only once if needed
+    if symbol not in ['VIX', '^VIX']:
+        vix = yf.Ticker('^VIX')
+        vix_df = vix.history(start=start_date, end=end_date)
+        return df, vix_df
+    return df, None
+
+def analyze_strategy_performance(results, symbol):
+    """Analyze and compare strategy performance for a ticker"""
+    strategy_metrics = {
+        'MACD': results[0],
+        'MACD Zero-Cross': results[1],
+        'VPVMA': results[2],
+        'VPVMA Zero-Cross': results[3]
+    }
+    
+    # Calculate Sharpe ratio for each strategy
+    sharpe_ratios = {}
+    for strategy_name, df in strategy_metrics.items():
+        returns = df['Strategy_Returns']
+        sharpe = np.sqrt(52) * returns.mean() / returns.std() if returns.std() != 0 else 0
+        sharpe_ratios[strategy_name] = sharpe
+    
+    # Find best strategy
+    best_strategy = max(sharpe_ratios.items(), key=lambda x: x[1])
+    
+    # Save performance comparison to ticker directory
+    ticker_dir = os.path.join('data', symbol.replace('^', ''))
+    performance_file = os.path.join(ticker_dir, 'strategy_comparison.txt')
+    
+    with open(performance_file, 'w') as f:
+        f.write(f"Strategy Performance Comparison for {symbol}\n")
+        f.write("=" * 50 + "\n\n")
+        f.write("Sharpe Ratios:\n")
+        for strategy, sharpe in sharpe_ratios.items():
+            f.write(f"{strategy}: {sharpe:.2f}\n")
+        f.write(f"\nBest Strategy: {best_strategy[0]} (Sharpe: {best_strategy[1]:.2f})")
+    
+    return best_strategy[0], sharpe_ratios
+
+def process_etf(symbol, start_date='2005-01-01', end_date='2023-12-31', initial_capital=1_000_000):
+    """Process all strategies for a single ETF"""
+    try:
+        # Create ETF-specific directory
+        ticker_dir = os.path.join('data', symbol.replace('^', ''))
+        os.makedirs(ticker_dir, exist_ok=True)
+        
+        # Download data once and reuse
+        df, vix_df = download_data(symbol, start_date, end_date)
+        
+        # Process all strategies in parallel
+        with ThreadPoolExecutor(max_workers=4) as executor:
+            futures = []
+            futures.append(executor.submit(get_macd_signals, df=df.copy(), symbol=symbol))
+            futures.append(executor.submit(get_macd_signals_zero_cross, df=df.copy(), symbol=symbol))
+            futures.append(executor.submit(get_vpvma_signals, df=df.copy(), vix_df=vix_df.copy(), symbol=symbol))
+            futures.append(executor.submit(get_vpvma_signals_zero_cross, df=df.copy(), vix_df=vix_df.copy(), symbol=symbol))
+            
+            results = [f.result() for f in as_completed(futures)]
+            
+            # Analyze strategy performance
+            best_strategy, sharpe_ratios = analyze_strategy_performance(results, symbol)
+            print(f"\n{symbol} Best Strategy: {best_strategy}")
+            
+            return results, best_strategy, sharpe_ratios
+            
+    except Exception as e:
+        print(f"Error processing {symbol}: {str(e)}")
+        return None
 
 def apply_stop_loss(df, stop_loss_pct=0.03):
     """
@@ -60,13 +136,11 @@ def calculate_strategy_returns(df):
     df['Position_Change'] = df['Position'].diff()
     return df
 
-def get_macd_signals(symbol='^GSPC', start_date='2005-01-01', end_date='2023-12-31', initial_capital=1_000_000):
-    # Create data directory if it doesn't exist
-    os.makedirs('data', exist_ok=True)
-    
-    # Download S&P 500 data
-    ticker = yf.Ticker(symbol)
-    df = ticker.history(start=start_date, end=end_date)
+def get_macd_signals(df=None, symbol='^GSPC', start_date='2005-01-01', end_date='2023-12-31', initial_capital=1_000_000):
+    """MACD strategy with pre-downloaded data option"""
+    if df is None:
+        ticker = yf.Ticker(symbol)
+        df = ticker.history(start=start_date, end=end_date)
     
     # Convert timezone from UTC to US/Eastern
     df.index = pd.to_datetime(df.index)
@@ -101,29 +175,22 @@ def get_macd_signals(symbol='^GSPC', start_date='2005-01-01', end_date='2023-12-
     weekly_df['Position'] = weekly_df['Position'].shift(1)
     
     # Initialize Portfolio Value
-    weekly_df['Portfolio_Value'] = initial_capital
+    weekly_df['Portfolio_Value'] = 1_000_000
     
-    # Apply stop loss with 2%
-    weekly_df = apply_stop_loss(weekly_df, stop_loss_pct=0.02)
+    # Apply stop loss with 5%
+    weekly_df = apply_stop_loss(weekly_df, stop_loss_pct=0.05)
     
     # Recalculate returns after stop loss
     weekly_df = calculate_strategy_returns(weekly_df)
     
-    # Save DataFrame to CSV
-    output_file = f'data/weekly_macd_signals_{symbol.replace("^", "")}.csv'
+    # Save DataFrame to CSV in ticker directory
+    output_file = os.path.join('data', symbol.replace('^', ''), 'weekly_macd_signals.csv')
     weekly_df.to_csv(output_file)
     print(f"Data saved to {output_file}")
     
     return weekly_df
 
-def get_macd_signals_zero_cross(symbol='^GSPC', start_date='2005-01-01', end_date='2023-12-31', initial_capital=1_000_000):
-    # Create data directory if it doesn't exist
-    os.makedirs('data', exist_ok=True)
-    
-    # Download S&P 500 data
-    ticker = yf.Ticker(symbol)
-    df = ticker.history(start=start_date, end=end_date)
-    
+def get_macd_signals_zero_cross(df, symbol):
     # Convert timezone from UTC to US/Eastern
     df.index = pd.to_datetime(df.index)
     df.index = df.index.tz_convert('US/Eastern')
@@ -171,32 +238,28 @@ def get_macd_signals_zero_cross(symbol='^GSPC', start_date='2005-01-01', end_dat
     weekly_df['Position'] = weekly_df['Position'].shift(1)
     
     # Initialize Portfolio Value
-    weekly_df['Portfolio_Value'] = initial_capital
+    weekly_df['Portfolio_Value'] = 1_000_000
     
-    # Apply stop loss with 2%
-    weekly_df = apply_stop_loss(weekly_df, stop_loss_pct=0.02)
+    # Apply stop loss with 5%
+    weekly_df = apply_stop_loss(weekly_df, stop_loss_pct=0.05)
     
     # Recalculate returns after stop loss
     weekly_df = calculate_strategy_returns(weekly_df)
     
-    # Save DataFrame to CSV
-    output_file = f'data/weekly_macd_zero_cross_{symbol.replace("^", "")}.csv'
+    # Save DataFrame to CSV in ticker directory
+    output_file = os.path.join('data', symbol.replace('^', ''), 'weekly_macd_zero_cross.csv')
     weekly_df.to_csv(output_file)
     print(f"Data saved to {output_file}")
     
     return weekly_df
 
-def get_vpvma_signals(symbol='^GSPC', start_date='2005-01-01', end_date='2023-12-31', initial_capital=1_000_000):
-    # Create data directory if it doesn't exist
-    os.makedirs('data', exist_ok=True)
-    
-    # Download S&P 500 data
-    ticker = yf.Ticker(symbol)
-    df = ticker.history(start=start_date, end=end_date)
-    
-    # Download VIX data
-    vix = yf.Ticker('^VIX')
-    vix_df = vix.history(start=start_date, end=end_date)
+def get_vpvma_signals(df=None, vix_df=None, symbol='^GSPC', start_date='2005-01-01', end_date='2023-12-31', initial_capital=1_000_000):
+    """VPVMA strategy with pre-downloaded data option"""
+    if df is None or vix_df is None:
+        ticker = yf.Ticker(symbol)
+        df = ticker.history(start=start_date, end=end_date)
+        vix = yf.Ticker('^VIX')
+        vix_df = vix.history(start=start_date, end=end_date)
     
     # Convert timezone from UTC to US/Eastern
     df.index = pd.to_datetime(df.index)
@@ -258,33 +321,22 @@ def get_vpvma_signals(symbol='^GSPC', start_date='2005-01-01', end_date='2023-12
     weekly_df['Position'] = weekly_df['Position'].shift(1)
     
     # Initialize Portfolio Value
-    weekly_df['Portfolio_Value'] = initial_capital
+    weekly_df['Portfolio_Value'] = 1_000_000
     
-    # Apply stop loss with 2%
-    weekly_df = apply_stop_loss(weekly_df, stop_loss_pct=0.02)
+    # Apply stop loss with 5%
+    weekly_df = apply_stop_loss(weekly_df, stop_loss_pct=0.05)
     
     # Recalculate returns after stop loss
     weekly_df = calculate_strategy_returns(weekly_df)
     
-    # Save DataFrame to CSV
-    output_file = f'data/weekly_vpvma_signals_{symbol.replace("^", "")}.csv'
+    # Save DataFrame to CSV in ticker directory
+    output_file = os.path.join('data', symbol.replace('^', ''), 'weekly_vpvma_signals.csv')
     weekly_df.to_csv(output_file)
     print(f"Data saved to {output_file}")
     
     return weekly_df
 
-def get_vpvma_signals_zero_cross(symbol='^GSPC', start_date='2005-01-01', end_date='2023-12-31', initial_capital=1_000_000):
-    # Create data directory if it doesn't exist
-    os.makedirs('data', exist_ok=True)
-    
-    # Download S&P 500 data
-    ticker = yf.Ticker(symbol)
-    df = ticker.history(start=start_date, end=end_date)
-    
-    # Download VIX data
-    vix = yf.Ticker('^VIX')
-    vix_df = vix.history(start=start_date, end=end_date)
-    
+def get_vpvma_signals_zero_cross(df, vix_df, symbol):
     # Convert timezone from UTC to US/Eastern
     df.index = pd.to_datetime(df.index)
     df.index = df.index.tz_convert('US/Eastern')
@@ -357,16 +409,16 @@ def get_vpvma_signals_zero_cross(symbol='^GSPC', start_date='2005-01-01', end_da
     weekly_df['Position'] = weekly_df['Position'].shift(1)
     
     # Initialize Portfolio Value
-    weekly_df['Portfolio_Value'] = initial_capital
+    weekly_df['Portfolio_Value'] = 1_000_000
     
-    # Apply stop loss with 2%
-    weekly_df = apply_stop_loss(weekly_df, stop_loss_pct=0.02)
+    # Apply stop loss with 5%
+    weekly_df = apply_stop_loss(weekly_df, stop_loss_pct=0.05)
     
     # Recalculate returns after stop loss
     weekly_df = calculate_strategy_returns(weekly_df)
     
-    # Save DataFrame to CSV
-    output_file = f'data/weekly_vpvma_zero_cross_{symbol.replace("^", "")}.csv'
+    # Save DataFrame to CSV in ticker directory
+    output_file = os.path.join('data', symbol.replace('^', ''), 'weekly_vpvma_zero_cross.csv')
     weekly_df.to_csv(output_file)
     print(f"Data saved to {output_file}")
     
