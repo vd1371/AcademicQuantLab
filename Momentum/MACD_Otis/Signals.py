@@ -2,7 +2,6 @@ import pandas as pd
 import yfinance as yf
 import numpy as np
 import os
-from concurrent.futures import ThreadPoolExecutor, as_completed
 
 def download_data(symbol, start_date, end_date):
     """Download price and VIX data for a symbol"""
@@ -59,21 +58,17 @@ def process_etf(symbol, start_date='2005-01-01', end_date='2023-12-31', initial_
         # Download data once and reuse
         df, vix_df = download_data(symbol, start_date, end_date)
         
-        # Process all strategies in parallel
-        with ThreadPoolExecutor(max_workers=4) as executor:
-            futures = []
-            futures.append(executor.submit(get_macd_signals, df=df.copy(), symbol=symbol))
-            futures.append(executor.submit(get_macd_signals_zero_cross, df=df.copy(), symbol=symbol))
-            futures.append(executor.submit(get_vpvma_signals, df=df.copy(), vix_df=vix_df.copy(), symbol=symbol))
-            futures.append(executor.submit(get_vpvma_signals_zero_cross, df=df.copy(), vix_df=vix_df.copy(), symbol=symbol))
-            
-            results = [f.result() for f in as_completed(futures)]
-            
-            # Analyze strategy performance
-            best_strategy, sharpe_ratios = analyze_strategy_performance(results, symbol)
-            print(f"\n{symbol} Best Strategy: {best_strategy}")
-            
-            return results, best_strategy, sharpe_ratios
+        results = []
+        results.append(get_macd_signals(df=df.copy(), symbol=symbol))
+        results.append(get_macd_signals_zero_cross(df=df.copy(), symbol=symbol))
+        results.append(get_vpvma_signals(df=df.copy(), vix_df=vix_df.copy(), symbol=symbol))
+        results.append(get_vpvma_signals_zero_cross(df=df.copy(), vix_df=vix_df.copy(), symbol=symbol))
+        
+        # Analyze strategy performance
+        best_strategy, sharpe_ratios = analyze_strategy_performance(results, symbol)
+        print(f"\n{symbol} Best Strategy: {best_strategy}")
+        
+        return results, best_strategy, sharpe_ratios
             
     except Exception as e:
         print(f"Error processing {symbol}: {str(e)}")

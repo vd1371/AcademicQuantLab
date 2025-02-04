@@ -10,7 +10,6 @@ from Signals import (
     get_vpvma_signals_zero_cross
 )
 import os
-from concurrent.futures import ThreadPoolExecutor, as_completed
 import yfinance as yf
 
 def calculate_performance_metrics(df):
@@ -255,20 +254,17 @@ if __name__ == "__main__":
     best_strategies = {}
     all_sharpe_ratios = {}
     
-    # Process ETFs in parallel
-    with ThreadPoolExecutor(max_workers=4) as executor:
-        futures = {executor.submit(process_etf, etf): etf for etf in etfs}
-        for future in as_completed(futures):
-            etf = futures[future]
-            try:
-                result = future.result()
-                if result:
-                    results, best_strategy, sharpe_ratios = result
-                    best_strategies[etf] = best_strategy
-                    all_sharpe_ratios[etf] = sharpe_ratios
-                    all_results[etf] = results  # Store all results
-            except Exception as e:
-                print(f"Error processing {etf}: {str(e)}")
+    # Process ETFs sequentially
+    for etf in etfs:
+        try:
+            result = process_etf(etf)
+            if result:
+                results, best_strategy, sharpe_ratios = result
+                best_strategies[etf] = best_strategy
+                all_sharpe_ratios[etf] = sharpe_ratios
+                all_results[etf] = results  # Store all results
+        except Exception as e:
+            print(f"Error processing {etf}: {str(e)}")
     
     # Create summary of best strategies and key stats
     summary_dir = os.path.join('data', 'summary')
