@@ -36,6 +36,11 @@ The code is written in the simplest way so it can be understood easily and clear
 
 12- [Cross Stock Momentum](https://github.com/vd1371/AcademicQuantLab/blob/main/Momentum/Cross_stock_Momentum.ipynb)
 
+13- [Polynomial Moving Regression Band](https://github.com/vd1371/AcademicQuantLab/blob/main/Momentum/Polynomial_Moving_Regression_Band.ipynb)
+
+14- [Dynamic Tactical Asset Allocation](https://github.com/vd1371/AcademicQuantLab/blob/main/Momentum/Dynamic Tactical Asset Allocation in HK market.ipynb)
+
+
 #### Reversion Strategies:
 2- [Stock Returns After Extreme Loss Events](https://github.com/vd1371/AcademicQuantLab/blob/main/Reversion/StockReturnsAfterExtremeLossEvents.ipynb)
 
