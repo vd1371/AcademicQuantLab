@@ -42,6 +42,7 @@ The code is written in the simplest way so it can be understood easily and clear
 
 15- [MACD Based Signals](https://github.com/vd1371/AcademicQuantLab/blob/main/Momentum/MACD_based_signals.ipynb)
 
+16- [Holt-Winter for Gold and BTC](https://github.com/vd1371/AcademicQuantLab/blob/main/Momentum/Holt_winters_for_Gold_and_BTC.ipynb)
 
 #### Reversion Strategies:
 2- [Stock Returns After Extreme Loss Events](https://github.com/vd1371/AcademicQuantLab/blob/main/Reversion/StockReturnsAfterExtremeLossEvents.ipynb)
