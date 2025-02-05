@@ -40,7 +40,7 @@ The code is written in the simplest way so it can be understood easily and clear
 
 14- [Dynamic Tactical Asset Allocation](https://github.com/vd1371/AcademicQuantLab/blob/main/Momentum/Dynamic_Tactical_Asset_Allocation_in_HK.ipynb)
 
-15- [MACD Based Signals] (https://github.com/vd1371/AcademicQuantLab/blob/main/Momentum/MACD_based_signals.ipynb)
+15- [MACD Based Signals](https://github.com/vd1371/AcademicQuantLab/blob/main/Momentum/MACD_based_signals.ipynb)
 
 
 #### Reversion Strategies:
