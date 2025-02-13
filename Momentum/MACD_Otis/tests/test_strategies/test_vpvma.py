@@ -21,12 +21,16 @@ def test_calculate_vpvma():
     
     assert isinstance(result, pd.DataFrame)
     assert 'VPVMA' in result.columns
+    assert 'VPT' in result.columns
     assert len(result) == len(df)
+    assert not result['VPVMA'].isna().all()
 
 def test_generate_vpvma_signals():
     df = create_sample_data()
     vix_df = create_sample_vix()
     result = generate_vpvma_signals(df, vix_df)
     
+    assert isinstance(result, pd.DataFrame)
     assert 'Position' in result.columns
-    assert result['Position'].isin([1, 0, -1]).all() 
+    assert result['Position'].isin([1, 0, -1]).all()
+    assert result['Position'].iloc[0] == 0  # First position should be 0 due to shift 
