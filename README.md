@@ -1,4 +1,4 @@
-# AcademicQuantLab
+# Quantio
 ### A humble repository for academic quant strategies
 
 I intend to collect the replicated codes that I have written, or write, based on the quant finance literature in this repository.The codes are written in JupyterNotebooks so you can see the results as well. Each notebook will be written in a way to be independently executable.
